@@ -1,8 +1,3 @@
-stari=["Vasiliev", "kartechkin"]
-molodoi=["druzhko", "harlamov"]
-miaso=["Doodoo", "pewdiepie"]
-
-
 
 class Persona:
   def vozrast (self,one):

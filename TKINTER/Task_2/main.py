@@ -16,7 +16,7 @@
  
 # print("Сумма ряда Лейбница первых 8 членов = ", pi)
 
-import math
-n=20
+#import math
+#n=20
 #x=int(input("Введите искомое число"))
 #if x==1

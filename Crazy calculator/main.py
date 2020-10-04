@@ -846,4 +846,5 @@ def main():
     my_file.close()      
 
 if __name__ == '__main__': #Так визуально удобней 
+    print("Welcome to crazy calculator\n")
     main()

@@ -55,3 +55,16 @@ print (flights [dest][month][year][otmena])
 
 
 #TASK 4
+
+flights['dep_hour'] = flights['dep_time'] // 100
+flights['dep_minute'] = flights['dep_time'] % 100
+
+mid_1=flights['dep_time'] // 100 
+mid_2=flights['dep_time'] % 100
+
+flights['dep_minutes_since_midnight'] =mid_1 * 60 + mid_2
+heads = flights.loc[:, ['dep_minute','dep_hour', 'dep_minutes_since_midnight']].head(10) 
+print (heads) #Это может убить интерпретатор 
+sums = flights.loc[:, ['dep_hour', 'dep_minute', 'dep_minutes_since_midnight']].sum()
+print (sums) #Это может убить интерпретатор 
+

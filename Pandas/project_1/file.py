@@ -1,3 +1,27 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+#Читаем данные по рейсам
+flights = pd.read_csv('flights.csv',
+                     parse_dates=['time_hour'], # разобрать дату
+                     dtype={'carrier' : 'str' # код перевозчика - текст
+                           })  
+
+#Читаем список авиакомпаний
+airlines = pd.read_csv('airlines.csv', 
+                      dtype={'carrier':'str'}) # код перевозчика - текст
+airlines.rename({'name':'airline'}, axis='columns', inplace=True)
+
+#Присоединяем авиакомпании:
+flights = pd.merge(flights, airlines, on='carrier', how='left')
+
+flights.head()
+flights.info()
+
+
+
 #TASK 1
 col_list=["dep_time","dep_delay","air_time"]
 df = pd.read_csv("flights.csv", usecols=col_list)

@@ -68,3 +68,26 @@ print (heads) #Это может убить интерпретатор
 sums = flights.loc[:, ['dep_hour', 'dep_minute', 'dep_minutes_since_midnight']].sum()
 print (sums) #Это может убить интерпретатор 
 
+
+
+#TASK 5
+
+ax=int(input("Input the axis\n"))
+
+if ax['dep_delay'] <= 0:
+  flights['status'] = flights.apply("on time")
+  flights.iloc[:, -10:].head(10)
+
+  flights.groupby('status')['status'].size()
+
+elif ax['dep_delay'] > 0:
+  flights['status'] = flights.apply("in custody")
+  flights.iloc[:, -10:].head(10)
+
+  flights.groupby('status')['status'].size()
+
+else: 
+  flights['status'] = flights.apply("cancelled ")
+  flights.iloc[:, -10:].head(10)
+
+  flights.groupby('status')['status'].size()

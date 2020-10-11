@@ -91,3 +91,18 @@ else:
   flights.iloc[:, -10:].head(10)
 
   flights.groupby('status')['status'].size()
+  
+  
+#TASK 6
+
+is_late = (flights['dep_delay'] > 0)
+print (flights[is_late].shape[0] / flights.shape[0])
+
+
+#TASK 7
+
+def veroin(company):
+    return company[company == 'отменен'].size // company.size
+
+grouped_airlines = flights.groupby(['airline'])
+grouped_airlines['status'].apply(veroin).sort_values(ascending=True).reset_index()['airline']

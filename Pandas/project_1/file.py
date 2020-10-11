@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from plotly import offline
 
 #Читаем данные по рейсам
 flights = pd.read_csv('flights.csv',

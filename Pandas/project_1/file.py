@@ -45,3 +45,13 @@ print (flights[dest][fligh][dates][delays])
 
 
 #TASK 3
+
+dest= flights['dest'] == 'PIT'
+month= flights['month'] == 9
+year= flights['year'] == 2013
+otmena = pd.isnull(flights['dep_time'])
+
+print (flights [dest][month][year][otmena])
+
+
+#TASK 4

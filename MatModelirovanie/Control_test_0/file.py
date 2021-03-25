@@ -222,7 +222,7 @@ class MatModel():
 
 
 
-
+#"""
 
 # АТР класса
 Mat=MatModel()
@@ -375,3 +375,211 @@ print ("\nустановившиеся вероятности. \n")
 matr1=np.copy(matr)
 
 Mat.task_9(matr1)
+
+
+#"""
+
+
+
+print("\n\nЗадание 2\nЗадана система массового обслуживания со следующими характеристиками:\nЗадана система массового обслуживания со следующими характеристиками:\nинтенсивность поступления\nλ=36\nканалов обслуживания\nm=6\nинтенсивность обслуживания\nμ=8\nмаксимальный размер очереди\nn=7\nИзначально требований в системе нет.\n\nСоставьте граф марковского процесса, запишите систему уравнений Колмогорова и найдите установившиеся вероятности состояний.")
+
+
+lambd = 36  #l
+Chanel =  6 # m
+Tense = 8 #my
+Max_SZ = 7 #n
+
+Matriza = np.zeros((Max_SZ+Chanel+1, Max_SZ+Chanel+1)) # P
+#devide by two parts
+for i in range(Max_SZ+Chanel+1):#lines
+    for j in range(Max_SZ+Chanel+1):#columns
+        if i == j - 1:
+            Matriza[i][j] = lambd
+        elif j == i-1:
+            Matriza[i][j] = Tense*(i-(i-Chanel)*(i>Chanel))
+
+
+MATR=[] #matrics
+
+for i in Matriza:
+    MATR.append(list(i))
+print('Матрица интенсивностей', MATR)
+
+
+###
+Matriza_2 = np.zeros((Max_SZ+Chanel+1, Max_SZ+Chanel+1))  # D
+for i in range(Max_SZ+Chanel+1):
+    Matriza_2[i][i] = np.sum(Matriza[i])
+
+Matriza_TRANS = Matriza.transpose()
+Some_Matrix = Matriza_TRANS - Matriza_2 # M
+Some_Matrix[-1] = np.ones((Max_SZ+Chanel+1))
+Some_Matrix_2 = np.linalg.inv(Some_Matrix) # M1
+
+Matriza = np.zeros((Max_SZ+Chanel+1)) # B
+Matriza[-1] = 1
+
+Some_Matrix_2 = Some_Matrix_2.dot(Matriza)
+###
+
+Matr_otkaz = Some_Matrix_2[-1] #p_otkas
+obs = 1 - Matr_otkaz #int_obs
+obsAndAbs = obs * lambd #obs abs
+
+Matr_queue_M = 0 #l_queue
+for i in range(1, Max_SZ+1):
+    Matr_queue_M += i * Some_Matrix_2[Chanel+i]
+    
+Matr_queue = 0 # t_queue
+for i in range(0,Max_SZ):
+    Matr_queue += ((i+1)/(Chanel*Tense)) * Some_Matrix_2[Chanel+i]
+    
+Num_Chan = 0 # n_canalov
+for i in range(1, Chanel+1):
+    Num_Chan+= i*Some_Matrix_2[i]
+for i in range(Chanel+1, Chanel+Max_SZ+1):
+    Num_Chan+= Chanel*Some_Matrix_2[i]
+    
+Mat_not_queue = 0 # p not queye
+for i in range(Chanel):
+    Mat_not_queue += Some_Matrix_2[i]
+    
+Stoi = 1 / lambd
+
+print('Вероятность отказа', Matr_otkaz)
+print('Интенсивность обслуживания',obs)
+print('Абсолютная интенсивность обслуживания',obsAndAbs)
+print('Средняя длина очереди', Matr_queue_M)
+print('Среднее время в очереди', Matr_queue)
+print('Среднее количество занятых каналов', Num_Chan)
+print('Вероятность, что заявка не окажется в очереди', Mat_not_queue)
+print('Среднее время простоя системы', Stoi)
+
+def rescale(x0, s1):
+    s2 = 1
+    x0 = s2*x0/s1
+    return x0
+
+def integrate(h,n,f,v):
+    k=np.zeros((n*4))
+    arg=np.zeros((n))
+
+    for i in range(0,n):
+        k[i*4]=f(v)[i]
+        arg[i]=v[i]+h*k[i*4]/2
+    
+    for i in range(0,n):
+        k[i*4+1]=f(arg)[i]
+        arg[i]=v[i]+h*k[i*4+1]/2
+        
+    for i in range(0,n):
+        k[i*4+2]=f(arg)[i]
+        arg[i]=v[i]+h*k[i*4+2]        
+        
+    for i in range(0,n):
+        k[i*4+3]=f(arg)[i]
+
+    result=np.zeros(n)   
+    for i in range(0,n):
+        result[i]=v[i]+h*(k[i*4]+2*k[i*4+1]+2*k[i*4+2]+k[i*4+3])/6
+
+    return result
+
+def f(v):
+    y=np.zeros((len(v)))
+    y[0]=1 #производная времени
+    y[1]=v[2]*Tense - v[1]*lambd #производная вероятность нулевого состояния
+    y[2]=v[1]*lambd+v[3]*2*Tense - v[2]*(lambd+Tense) #производная вероятность первого состояния
+    y[3]=v[2]*lambd+v[4]*3*Tense - v[3]*(lambd+(2*Tense)) #производная вероятность второго состояния
+    y[4]=v[3]*lambd+v[5]*4*Tense - v[4]*(lambd+(3*Tense)) #производная вероятность третьего состояния
+    y[5]=v[4]*lambd+v[6]*5*Tense - v[5]*(lambd+(4*Tense)) #производная вероятность четвертого состояния
+    y[6]=v[5]*lambd - v[6]*(lambd+(5*Tense)) #производная вероятность пятого состояния
+    y[7]=v[6]*lambd #производная вероятность шестого состояния
+    y[8] = v[0]*v[6]*lambd #интеграл времени
+    return y
+s1 = 0
+for i in range(6):
+    s1 += Some_Matrix_2[i]
+X1 = []   
+for i in range(6):
+    X1.append(rescale(Some_Matrix_2[i], s1))
+
+x=np.zeros((1))
+x[0]=0
+p0 = np.zeros((1))
+p1 = np.zeros((1))
+p2 = np.zeros((1))
+p3 = np.zeros((1))
+p4 = np.zeros((1))
+p5 = np.zeros((1))
+p6 = np.zeros((1))
+p0[0] = X1[0]
+p1[0] = X1[1]
+p2[0] = X1[2]
+p3[0] = X1[3]
+p4[0] = X1[4]
+p5[0] = X1[5]
+p6[0] = 0
+ftu=np.zeros((1))
+ftu[0] = p5[0]*lambd
+int_t_ftu=np.zeros((1))
+int_t_ftu[0] = 0
+
+h=0.001
+
+v=np.zeros(9)
+v[0]=0 #время
+v[1]=X1[0] #вероятность нулевого состояния
+v[2]=X1[1] #вероятность первого состояния
+v[3]=X1[2] #вероятность второго состояния
+v[4]=X1[3] #вероятность третьего состояния
+v[5]=X1[4] #вероятность четвертого состояния
+v[6]=X1[5] #вероятность пятого состояния 
+v[7]=0 #вероятность шестого состояния
+v[8]=0 #интеграл времени
+
+for t in range(1,20000):
+    v=integrate(h,9,f,v)
+    x=np.append(x,v[0]) 
+    p0=np.append(p0,v[1])
+    p1=np.append(p1,v[2])
+    p2=np.append(p2,v[3])
+    p3=np.append(p3,v[4])
+    p4=np.append(p4,v[5])
+    p5=np.append(p5,v[6])
+    p6=np.append(p6,v[7])
+    ftu=np.append(ftu, v[6] * lambd)
+    int_t_ftu=np.append(int_t_ftu, v[8])
+
+
+print("среднее время, когда в системе нет очереди.: ", int_t_ftu[-1])
+# Матрица интенсивностей
+# [[0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 
+# [1.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 
+# [0.0, 2.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+#  [0.0, 0.0, 3.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 
+# [0.0, 0.0, 0.0, 4.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 
+# [0.0, 0.0, 0.0, 0.0, 5.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+#  [0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0], 
+# [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 0.0, 5.0, 0.0, 0.0, 0.0],
+#  [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 0.0, 5.0, 0.0, 0.0], 
+# [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 0.0, 5.0, 0.0],
+#  [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 0.0, 5.0], 
+# [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 0.0]]
+
+#  b)     Ответ: 0.10514804845222071
+# c)	Найдите относительную и абсолютную интенсивность обслуживания.
+# 0.8948519515477793 (относительная)
+# 4.4742597577388965 (абсолютная)
+# d)	Найдите среднюю длину в очереди.
+# 2.208109017496635
+# e)	Найдите среднее время в очереди.
+# 0.44162180349932706
+# f)	Найдите среднее число занятых каналов.
+# 4.4742597577388965
+# g)	Найдите вероятность того, что поступающая заявка не будет ждать в очереди.
+# 0.263963660834455
+# h)	Найти среднее время простоя системы массового обслуживания.
+# 0.2
+# i)	Найти среднее время, когда в системе нет очереди.
+# 1.2998092622058512

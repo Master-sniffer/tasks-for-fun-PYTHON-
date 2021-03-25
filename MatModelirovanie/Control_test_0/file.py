@@ -187,31 +187,57 @@ class MatModel():
     print(matr1)
 
 
-  def task_A(self, matr1, matr2):
-    print("now")
+  def task_A(self, Max_SZ, Chanel,Matriza,lambd , Tense ):
+    for i in range(Max_SZ+Chanel+1):#lines
+        for j in range(Max_SZ+Chanel+1):#columns
+            if i == j - 1:
+                Matriza[i][j] = lambd
+            elif j == i-1:
+                Matriza[i][j] = Tense*(i-(i-Chanel)*(i>Chanel))
 
 
-  def task_B(self, matr1, matr2):
-    print("now")
+    MATR=[] #matrics
 
-  def task_C(self, matr1, matr2):
-    print("now")
-
-
-  def task_D(self, matr1, matr2):
-    print("now")
-
-  def task_E(self, matr1, matr2):
-    print("now")
+    for i in Matriza:
+        MATR.append(list(i))
+    print('Матрица интенсивностей', MATR)
+    return Matriza
 
 
-  def task_F(self, matr1, matr2):
-    print("now")
+  def task_BC(self, Some_Matrix_2, lambd):
+    Matr_otkaz = Some_Matrix_2[-1] #p_otkas
+    obs = 1 - Matr_otkaz #int_obs
+    obsAndAbs = obs * lambd #obs abs
+    return Matr_otkaz,obs,obsAndAbs
 
 
-  def task_G(self, matr1, matr2):
-    print("now")
+  def task_D(self, Max_SZ, Some_Matrix_2, Chanel):
+    Matr_queue_M = 0 #l_queue
+    for i in range(1, Max_SZ+1):
+      Matr_queue_M += i * Some_Matrix_2[Chanel+i]
+    return Matr_queue_M
 
+  def task_E(self, Max_SZ,Chanel, Tense,Some_Matrix_2  ):
+    Matr_queue = 0 # t_queue
+    for i in range(0,Max_SZ):
+      Matr_queue += ((i+1)/(Chanel*Tense)) * Some_Matrix_2[Chanel+i]
+    return Matr_queue
+
+
+  def task_F(self, Chanel, Some_Matrix_2, Max_SZ):
+    Num_Chan = 0 # n_canalov
+    for i in range(1, Chanel+1):
+        Num_Chan+= i*Some_Matrix_2[i]
+    for i in range(Chanel+1, Chanel+Max_SZ+1):
+        Num_Chan+= Chanel*Some_Matrix_2[i]
+    return Num_Chan
+
+
+  def task_G(self, Some_Matrix_2, Chanel):
+    Mat_not_queue = 0 # p not queye
+    for i in range(Chanel):
+        Mat_not_queue += Some_Matrix_2[i]
+    return Mat_not_queue
 
   def task_H(self, matr1, matr2):
     print("now")
@@ -219,13 +245,72 @@ class MatModel():
 
   def task_I(self, matr1, matr2):
     print("now")
+  
+
+  def Make_Some_Matrix(self, Matriza):
+    Matriza_2 = np.zeros((Max_SZ+Chanel+1, Max_SZ+Chanel+1))  # D
+    for i in range(Max_SZ+Chanel+1):
+        Matriza_2[i][i] = np.sum(Matriza[i])
+
+    Matriza_TRANS = Matriza.transpose()
+    Some_Matrix = Matriza_TRANS - Matriza_2 # M
+    Some_Matrix[-1] = np.ones((Max_SZ+Chanel+1))
+    Some_Matrix_2 = np.linalg.inv(Some_Matrix) # M1
+
+    Matriza = np.zeros((Max_SZ+Chanel+1)) # B
+    Matriza[-1] = 1
+
+    Some_Matrix_2 = Some_Matrix_2.dot(Matriza)
+    return Some_Matrix_2
+
+
+  def Desintegrate(self,h,n,v): #integrate
+      k=np.zeros((n*4))
+      arg=np.zeros((n))
+
+      for i in range(0,n):
+          k[i*4]=self.proizvod(v)[i]
+          arg[i]=v[i]+h*k[i*4]/2
+      
+      for i in range(0,n):
+          k[i*4+1]=self.proizvod(arg)[i]
+          arg[i]=v[i]+h*k[i*4+1]/2
+          
+      for i in range(0,n):
+          k[i*4+2]=self.proizvod(arg)[i]
+          arg[i]=v[i]+h*k[i*4+2]        
+          
+      for i in range(0,n):
+          k[i*4+3]=self.proizvod(arg)[i]
+
+      result=np.zeros(n)   
+      for i in range(0,n):
+          result[i]=v[i]+h*(k[i*4]+2*k[i*4+1]+2*k[i*4+2]+k[i*4+3])/6
+
+      return result
+  
+  
+  def proizvod(self,v): #f
+    y=np.zeros((len(v)))
+    y[0]=1 #производная времени
+    y[1]=v[2]*Tense - v[1]*lambd #производная вероятность нулевого состояния
+    y[2]=v[1]*lambd+v[3]*2*Tense - v[2]*(lambd+Tense) #производная вероятность первого состояния
+    y[3]=v[2]*lambd+v[4]*3*Tense - v[3]*(lambd+(2*Tense)) #производная вероятность второго состояния
+    y[4]=v[3]*lambd+v[5]*4*Tense - v[4]*(lambd+(3*Tense)) #производная вероятность третьего состояния
+    y[5]=v[4]*lambd+v[6]*5*Tense - v[5]*(lambd+(4*Tense)) #производная вероятность четвертого состояния
+    y[6]=v[5]*lambd - v[6]*(lambd+(5*Tense)) #производная вероятность пятого состояния
+    y[7]=v[6]*lambd #производная вероятность шестого состояния
+    y[8] = v[0]*v[6]*lambd #интеграл времени
+    return y
 
 
 
-#"""
+
 
 # АТР класса
 Mat=MatModel()
+
+"""
 
 # Задание 1
 print ("Система имеем 16 дискретных состояний. Изменение состояний происходит в дискретные моменты времени с заданной вероятность. Схема марковского процесса изображена на рисунке. Требуется определить:\nВероятность того, что за 5 шагов система перейдет из состояния 13 в состояние 7")
@@ -377,7 +462,7 @@ matr1=np.copy(matr)
 Mat.task_9(matr1)
 
 
-#"""
+"""
 
 
 
@@ -391,59 +476,79 @@ Max_SZ = 7 #n
 
 Matriza = np.zeros((Max_SZ+Chanel+1, Max_SZ+Chanel+1)) # P
 #devide by two parts
-for i in range(Max_SZ+Chanel+1):#lines
-    for j in range(Max_SZ+Chanel+1):#columns
-        if i == j - 1:
-            Matriza[i][j] = lambd
-        elif j == i-1:
-            Matriza[i][j] = Tense*(i-(i-Chanel)*(i>Chanel))
+# for i in range(Max_SZ+Chanel+1):#lines
+#     for j in range(Max_SZ+Chanel+1):#columns
+#         if i == j - 1:
+#             Matriza[i][j] = lambd
+#         elif j == i-1:
+#             Matriza[i][j] = Tense*(i-(i-Chanel)*(i>Chanel))
 
 
-MATR=[] #matrics
+# MATR=[] #matrics
 
-for i in Matriza:
-    MATR.append(list(i))
-print('Матрица интенсивностей', MATR)
+# for i in Matriza:
+#     MATR.append(list(i))
+# print('Матрица интенсивностей', MATR)
+
+Matriza=Mat.task_A(Max_SZ, Chanel,Matriza,lambd ,Tense)
 
 
 ###
-Matriza_2 = np.zeros((Max_SZ+Chanel+1, Max_SZ+Chanel+1))  # D
-for i in range(Max_SZ+Chanel+1):
-    Matriza_2[i][i] = np.sum(Matriza[i])
+# Matriza_2 = np.zeros((Max_SZ+Chanel+1, Max_SZ+Chanel+1))  # D
+# for i in range(Max_SZ+Chanel+1):
+#     Matriza_2[i][i] = np.sum(Matriza[i])
 
-Matriza_TRANS = Matriza.transpose()
-Some_Matrix = Matriza_TRANS - Matriza_2 # M
-Some_Matrix[-1] = np.ones((Max_SZ+Chanel+1))
-Some_Matrix_2 = np.linalg.inv(Some_Matrix) # M1
+# Matriza_TRANS = Matriza.transpose()
+# Some_Matrix = Matriza_TRANS - Matriza_2 # M
+# Some_Matrix[-1] = np.ones((Max_SZ+Chanel+1))
+# Some_Matrix_2 = np.linalg.inv(Some_Matrix) # M1
 
-Matriza = np.zeros((Max_SZ+Chanel+1)) # B
-Matriza[-1] = 1
+# Matriza = np.zeros((Max_SZ+Chanel+1)) # B
+# Matriza[-1] = 1
 
-Some_Matrix_2 = Some_Matrix_2.dot(Matriza)
+# Some_Matrix_2 = Some_Matrix_2.dot(Matriza)
 ###
 
-Matr_otkaz = Some_Matrix_2[-1] #p_otkas
-obs = 1 - Matr_otkaz #int_obs
-obsAndAbs = obs * lambd #obs abs
 
-Matr_queue_M = 0 #l_queue
-for i in range(1, Max_SZ+1):
-    Matr_queue_M += i * Some_Matrix_2[Chanel+i]
+Some_Matrix_2=Mat.Make_Some_Matrix(Matriza) # M1
+
+
+# Matr_otkaz = Some_Matrix_2[-1] #p_otkas
+# obs = 1 - Matr_otkaz #int_obs
+# obsAndAbs = obs * lambd #obs abs
+
+Matr_otkaz,obs,obsAndAbs=Mat.task_BC(Some_Matrix_2, lambd) #P otkaz, int obs , obs abs
+
+
+# Matr_queue_M = 0 #l_queue
+# for i in range(1, Max_SZ+1):
+#     Matr_queue_M += i * Some_Matrix_2[Chanel+i]
+
+Matr_queue_M=Mat.task_D( Max_SZ, Some_Matrix_2, Chanel)
+
     
-Matr_queue = 0 # t_queue
-for i in range(0,Max_SZ):
-    Matr_queue += ((i+1)/(Chanel*Tense)) * Some_Matrix_2[Chanel+i]
-    
-Num_Chan = 0 # n_canalov
-for i in range(1, Chanel+1):
-    Num_Chan+= i*Some_Matrix_2[i]
-for i in range(Chanel+1, Chanel+Max_SZ+1):
-    Num_Chan+= Chanel*Some_Matrix_2[i]
-    
-Mat_not_queue = 0 # p not queye
-for i in range(Chanel):
-    Mat_not_queue += Some_Matrix_2[i]
-    
+# Matr_queue = 0 # t_queue
+# for i in range(0,Max_SZ):
+#     Matr_queue += ((i+1)/(Chanel*Tense)) * Some_Matrix_2[Chanel+i]
+
+Matr_queue=Mat.task_E( Max_SZ,Chanel, Tense,Some_Matrix_2  )
+
+
+# Num_Chan = 0 # n_canalov
+# for i in range(1, Chanel+1):
+#     Num_Chan+= i*Some_Matrix_2[i]
+# for i in range(Chanel+1, Chanel+Max_SZ+1):
+#     Num_Chan+= Chanel*Some_Matrix_2[i]
+
+Num_Chan=Mat.task_F( Chanel, Some_Matrix_2, Max_SZ)
+
+
+# Mat_not_queue = 0 # p not queye
+# for i in range(Chanel):
+#     Mat_not_queue += Some_Matrix_2[i]
+
+Mat_not_queue=Mat.task_G( Some_Matrix_2, Chanel)
+
 Stoi = 1 / lambd
 
 print('Вероятность отказа', Matr_otkaz)
@@ -460,43 +565,7 @@ def rescale(x0, s1):
     x0 = s2*x0/s1
     return x0
 
-def integrate(h,n,f,v):
-    k=np.zeros((n*4))
-    arg=np.zeros((n))
 
-    for i in range(0,n):
-        k[i*4]=f(v)[i]
-        arg[i]=v[i]+h*k[i*4]/2
-    
-    for i in range(0,n):
-        k[i*4+1]=f(arg)[i]
-        arg[i]=v[i]+h*k[i*4+1]/2
-        
-    for i in range(0,n):
-        k[i*4+2]=f(arg)[i]
-        arg[i]=v[i]+h*k[i*4+2]        
-        
-    for i in range(0,n):
-        k[i*4+3]=f(arg)[i]
-
-    result=np.zeros(n)   
-    for i in range(0,n):
-        result[i]=v[i]+h*(k[i*4]+2*k[i*4+1]+2*k[i*4+2]+k[i*4+3])/6
-
-    return result
-
-def f(v):
-    y=np.zeros((len(v)))
-    y[0]=1 #производная времени
-    y[1]=v[2]*Tense - v[1]*lambd #производная вероятность нулевого состояния
-    y[2]=v[1]*lambd+v[3]*2*Tense - v[2]*(lambd+Tense) #производная вероятность первого состояния
-    y[3]=v[2]*lambd+v[4]*3*Tense - v[3]*(lambd+(2*Tense)) #производная вероятность второго состояния
-    y[4]=v[3]*lambd+v[5]*4*Tense - v[4]*(lambd+(3*Tense)) #производная вероятность третьего состояния
-    y[5]=v[4]*lambd+v[6]*5*Tense - v[5]*(lambd+(4*Tense)) #производная вероятность четвертого состояния
-    y[6]=v[5]*lambd - v[6]*(lambd+(5*Tense)) #производная вероятность пятого состояния
-    y[7]=v[6]*lambd #производная вероятность шестого состояния
-    y[8] = v[0]*v[6]*lambd #интеграл времени
-    return y
 s1 = 0
 for i in range(6):
     s1 += Some_Matrix_2[i]
@@ -520,26 +589,26 @@ p3[0] = X1[3]
 p4[0] = X1[4]
 p5[0] = X1[5]
 p6[0] = 0
-ftu=np.zeros((1))
-ftu[0] = p5[0]*lambd
-int_t_ftu=np.zeros((1))
-int_t_ftu[0] = 0
+sr=np.zeros((1))
+sr[0] = p5[0]*lambd
+t_sr=np.zeros((1))
+t_sr[0] = 0
 
 h=0.001
 
 v=np.zeros(9)
-v[0]=0 #время
-v[1]=X1[0] #вероятность нулевого состояния
-v[2]=X1[1] #вероятность первого состояния
-v[3]=X1[2] #вероятность второго состояния
-v[4]=X1[3] #вероятность третьего состояния
-v[5]=X1[4] #вероятность четвертого состояния
-v[6]=X1[5] #вероятность пятого состояния 
-v[7]=0 #вероятность шестого состояния
-v[8]=0 #интеграл времени
+v[0]=0 #time
+v[1]=X1[0] #zero sst time
+v[2]=X1[1] #first sst time
+v[3]=X1[2] #second sst time
+v[4]=X1[3] #third sst time
+v[5]=X1[4] #fourth sst time
+v[6]=X1[5] #fifth sst time
+v[7]=0 #sixth sst time
+v[8]=0 #integral of sst time
 
 for t in range(1,20000):
-    v=integrate(h,9,f,v)
+    v=Mat.Desintegrate(h,9,v)
     x=np.append(x,v[0]) 
     p0=np.append(p0,v[1])
     p1=np.append(p1,v[2])
@@ -548,24 +617,11 @@ for t in range(1,20000):
     p4=np.append(p4,v[5])
     p5=np.append(p5,v[6])
     p6=np.append(p6,v[7])
-    ftu=np.append(ftu, v[6] * lambd)
-    int_t_ftu=np.append(int_t_ftu, v[8])
+    sr=np.append(sr, v[6] * lambd)
+    t_sr_faf=np.append(t_sr, v[8])
 
+print("среднее время, когда в системе нет очереди.: ", t_sr_faf[-1])
 
-print("среднее время, когда в системе нет очереди.: ", int_t_ftu[-1])
-# Матрица интенсивностей
-# [[0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 
-# [1.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 
-# [0.0, 2.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-#  [0.0, 0.0, 3.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 
-# [0.0, 0.0, 0.0, 4.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 
-# [0.0, 0.0, 0.0, 0.0, 5.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-#  [0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0], 
-# [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 0.0, 5.0, 0.0, 0.0, 0.0],
-#  [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 0.0, 5.0, 0.0, 0.0], 
-# [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 0.0, 5.0, 0.0],
-#  [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 0.0, 5.0], 
-# [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 0.0]]
 
 #  b)     Ответ: 0.10514804845222071
 # c)	Найдите относительную и абсолютную интенсивность обслуживания.

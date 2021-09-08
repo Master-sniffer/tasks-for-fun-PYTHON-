@@ -1,0 +1,4 @@
+[console_scripts]
+leet-test-task-decode = convertor.__main__:decode
+leet-test-task-encode = convertor.__main__:encode
+
